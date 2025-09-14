@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Taskat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      /* Light, consistent purple for the Timer page */
+      --bg-solid: #cdb8f5;              /* change this to taste for a lighter/darker purple */
+
+      /* Original gradient for the Tasks page */
+      --bg-grad: radial-gradient(1200px 600px at 20% -10%, #9f7bb6 0%, transparent 60%),
+                 #6f4a98;
+
+      --card: rgba(255,255,255,0.12);
+      --card-strong: rgba(255,255,255,0.18);
+      --text: #fff;
+      --muted: rgba(255,255,255,0.85);
+      --line: rgba(255,255,255,0.22);
+      --ring: rgba(255,255,255,0.35);
+      --green:#49e38c; --red:#ff6b6b;
+      --radius: 14px; --gap: 14px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; color:var(--text);
+      background: var(--bg-grad);
+      font-family: ui-sans-serif, system-ui, Segoe UI, Roboto, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+    }
+
+    /* Header */
+    header{
+      padding: 16px 0; text-align:center; position: sticky; top:0; z-index: 10;
+    }
+    header h1{ margin:0; font-size: 24px; letter-spacing: .5px; font-weight: 700; }
+    #cat{ width:100px; position:fixed; top:10px; right:10px; filter:none; }
+
+    /* Layout */
+    .wrap{ max-width: 960px; margin: 20px auto 40px; padding: 0 16px; display: grid; gap: var(--gap) }
+    .h1{ display:flex; align-items:center; gap:10px }
+    .muted{ color:var(--muted); font-size:13px }
+
+    /* Tabs */
+    .tabs{
+      display:flex; gap:8px; background: rgba(255,255,255,0.10);
+      padding:6px; border-radius: 14px; border:1px solid var(--line);
+    }
+    .tab-btn{
+      appearance:none; border:0; cursor:pointer; font-weight:700;
+      padding:12px 16px; border-radius: 12px; color:#2b1f44;
+      background: rgba(255,255,255,0.95);
+      transition: background .15s ease, transform .06s ease, box-shadow .2s ease;
+      box-shadow: 0 6px 14px rgba(0,0,0,.18);
+    }
+    .tab-btn[aria-selected="true"]{ background:#fff; outline: 2px solid #fff; color:#1b1330; }
+    .tab-panel{ display:none; }
+    .tab-panel.active{ display:block; }
+
+    /* Cards */
+    .card{
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: 0 10px 24px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.05);
+      margin-top: 10px;
+    }
+    .card h3{
+      margin: 0 0 10px; font-size: 14px; letter-spacing:.4px; text-transform: uppercase; color: var(--muted);
+    }
+
+    /* Timer */
+    #timer{
+      font-size: clamp(40px, 7vw, 64px);
+      text-align:center; margin:10px auto 12px;
+      font-weight:800; letter-spacing: 1px;
+      border: 2px solid var(--ring);
+      border-radius: 12px;
+      padding: 10px 22px;
+      background: rgba(255,255,255,0.08);
+      width: max-content; min-width: 220px;
+    }
+    .center{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap }
+
+    /* Buttons */
+    button{
+      background: rgba(255,255,255,0.95); color:#3b2462;
+      border: 0; border-radius: 10px; cursor:pointer; font-weight:700;
+      padding:10px 16px; transition: transform .06s ease, box-shadow .2s ease, background .2s ease;
+      box-shadow: 0 6px 14px rgba(0,0,0,.18);
+    }
+    .btn-green{ color:#053d2c; background: var(--green) }
+    .btn-red{ color:#3d0a0a; background: var(--red) }
+
+    /* Inputs */
+    input, textarea, select{
+      width:100%; padding:10px 12px; border-radius:10px;
+      border:1px solid var(--ring); background: rgba(255,255,255,0.08); color:var(--text);
+      outline:none; transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+      font-size: 16px;
+    }
+    textarea::placeholder, input::placeholder{ color:rgba(255,255,255,0.85) }
+    .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap }
+    .row>*{ flex:1 }
+    .mins{ flex: 0 0 110px }
+
+    /* Lists */
+    ul{ list-style:none; margin:0; padding:0 }
+    li.item{
+      display:flex; align-items:center; gap:12px;
+      background: var(--card-strong);
+      border: 1px solid var(--line);
+      padding: 12px 14px; border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.05);
+      margin-top: 10px;
+      font-size: 18px; /* larger task text */
+    }
+    li.item:first-child{ margin-top:0 }
+    .titleEditable{
+      flex:1; border:none; background:transparent; color:var(--text);
+      padding:8px 10px; border-radius:10px; font-weight:600; font-size:18px;
+    }
+    .titleEditable:focus{ outline:1px solid var(--ring); background: rgba(255,255,255,0.1) }
+    .task-title{ min-width: 220px; font-weight: 700; opacity:.95; font-size:18px; }
+    .item.done .task-title, .item.done .titleEditable{ text-decoration: line-through; opacity: .7; }
+    .pill{ font-size: 12px; padding:4px 8px; border-radius: 999px; background: rgba(255,255,255,0.12); border: 1px solid var(--ring) }
+    #plan li.item{ background: rgba(255,255,255,0.1) }
+
+    /* Loading / busy helpers */
+    .button-busy { opacity: .75; pointer-events: none; }
+    .list-loading { opacity: .85; font-style: italic; }
+  </style>
+</head>
+<body>
+  <img src="cat.png" alt="cat" id="cat">
+  <header>
+    <h1>Taskat</h1>
+  </header>
+
+  <div class="wrap">
+    <!-- header row (bubble removed) -->
+    <div class="h1">
+      <div class="muted" style="margin-left:auto" id="today"></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs" role="tablist" aria-label="Pomo Planner Sections">
+      <button class="tab-btn" id="tabTimer" role="tab" aria-controls="panelTimer" aria-selected="true">Timer</button>
+      <button class="tab-btn" id="tabTasks" role="tab" aria-controls="panelTasks" aria-selected="false">Tasks & Planning</button>
+    </div>
+
+    <!-- TAB: Timer -->
+    <section id="panelTimer" class="tab-panel active" role="tabpanel" aria-labelledby="tabTimer">
+      <div class="card">
+        <p id="message" class="muted" style="text-align:center;margin:0 0 6px;">Work Time</p>
+        <div id="timer">25:00</div>
+        <div class="center">
+          <button id="startBtn" class="btn-green">Start</button>
+          <button id="stopBtn"  class="btn-red">Stop</button>
+          <button id="resetBtn">Reset</button>
+          <button id="loadFirstBtn">Load Plan</button>
+          <button id="shortBreakBtn">Short Break (5m)</button>
+          <button id="longBreakBtn">Long Break (15m)</button>
+        </div>
+        <div class="muted" id="currentTask" style="text-align:center;margin-top:8px;"></div>
+      </div>
+    </section>
+
+    <!-- TAB: Tasks & Planning -->
+    <section id="panelTasks" class="tab-panel" role="tabpanel" aria-labelledby="tabTasks">
+      <!-- weekly brief -->
+      <div class="card">
+        <h3>Weekly Brief</h3>
+        <div class="row">
+          <textarea id="brief" rows="5" placeholder="Finish slides due Monday ~45min #work high
+Research vendors Tue ~60m #work
+Call dentist
+Laundry"></textarea>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button id="parseBtn">Create Tasks</button>
+          <span class="muted" id="parseStatus"></span>
+        </div>
+      </div>
+
+      <!-- checklist -->
+      <div class="card">
+        <h3>Task List</h3>
+        <div class="row">
+          <input id="newTitle" placeholder="Add a task…" />
+          <input id="newMinutes" class="mins" type="number" min="5" step="5" placeholder="min" />
+          <button id="addBtn">Add</button>
+        </div>
+        <ul id="list" style="margin-top:10px"></ul>
+        <div class="muted" style="margin-top:8px">Tip: click the title to edit; change minutes; tick to mark done.</div>
+      </div>
+
+      <!-- session planner -->
+      <div class="card">
+        <h3>Session Planner</h3>
+        <div class="row">
+          <input id="minutes" type="number" min="10" step="5" placeholder="How many minutes? e.g., 90" />
+          <button id="planBtn">Generate plan</button>
+        </div>
+        <ul id="plan" style="margin-top:10px"></ul>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // ---------- utils ----------
+    const $ = (id) => document.getElementById(id);
+    const safeFetch = async (url, opts={}) => {
+      const res = await fetch(url, { cache:'no-store', ...opts });
+      let data = null;
+      try { data = await res.json(); } catch {}
+      if (!res.ok) throw new Error((data && data.error) || res.status + ' ' + res.statusText);
+      return data;
+    };
+    $('today').textContent = new Date().toLocaleString([], {weekday:'long', month:'short', day:'numeric'});
+
+    // ---------- tabs ----------
+    const tabBtns = [ $('tabTimer'), $('tabTasks') ];
+    const panels = { panelTimer: $('panelTimer'), panelTasks: $('panelTasks') };
+    function selectTab(id){
+      tabBtns.forEach(b => b.setAttribute('aria-selected', String(b.id === id)));
+      Object.values(panels).forEach(p => p.classList.remove('active'));
+      const target = id === 'tabTimer' ? panels.panelTimer : panels.panelTasks;
+      target.classList.add('active');
+    }
+    $('tabTimer').onclick = () => selectTab('tabTimer');
+    $('tabTasks').onclick = () => selectTab('tabTasks');
+
+    // ---------- timer (classic Pomodoro + manual breaks) ----------
+    let timer = null;
+    let isWork = true;
+    let left = 25 * 60;
+    let workSessions = 0;
+    let nextWorkSec = null, nextTitle = null;
+
+    const fmt = s => String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
+    const paint = () => { $('timer').textContent = fmt(left); };
+
+    function switchSession() {
+      if (isWork) workSessions++;
+      isWork = !isWork;
+
+      if (isWork) {
+        left = 25 * 60;
+        $('message').textContent = 'Work Time';
+      } else {
+        if (workSessions % 4 === 0) {
+          left = 15 * 60;
+          $('message').textContent = 'Long Break';
+        } else {
+          left = 5 * 60;
+          $('message').textContent = 'Short Break';
+        }
+      }
+      paint();
+    }
+
+    function tick() {
+      if (left > 0) {
+        left--;
+        paint();
+      } else {
+        clearInterval(timer); timer = null;
+        switchSession();
+        timer = setInterval(tick, 1000);
+      }
+    }
+
+    $('startBtn').onclick = () => {
+      if (left <= 0) {
+        if (isWork) left = 25 * 60;
+        else left = (workSessions % 4 === 0) ? 15 * 60 : 5 * 60;
+      }
+      paint();
+      clearInterval(timer);
+      timer = setInterval(tick, 1000);
+    };
+
+    $('stopBtn').onclick = () => {
+      clearInterval(timer); timer = null;
+    };
+
+    $('resetBtn').onclick = () => {
+      clearInterval(timer); timer = null;
+      left = isWork ? 25 * 60 : ((workSessions % 4 === 0) ? 15 * 60 : 5 * 60);
+      paint();
+    };
+
+    $('loadFirstBtn').onclick = () => {
+      if (nextWorkSec) {
+        isWork = true;
+        left = nextWorkSec;
+        paint();
+        $('currentTask').textContent = nextTitle ? ('Next: ' + nextTitle) : '';
+        $('message').textContent = 'Work Time';
+      } else {
+        alert('Generate a plan first.');
+      }
+    };
+
+    // Manual break starters (do not increment workSessions)
+    $('shortBreakBtn').onclick = () => {
+      clearInterval(timer);
+      isWork = false;
+      left = 5 * 60;
+      $('message').textContent = 'Short Break';
+      paint();
+      timer = setInterval(tick, 1000);
+    };
+    $('longBreakBtn').onclick = () => {
+      clearInterval(timer);
+      isWork = false;
+      left = 15 * 60;
+      $('message').textContent = 'Long Break';
+      paint();
+      timer = setInterval(tick, 1000);
+    };
+
+    paint();
+
+    // ---------- checklist with loading states ----------
+    const $list = $('list');
+
+    async function loadTasks() {
+      $list.innerHTML = '<li class="item list-loading">Loading tasks…</li>';
+      try {
+        const data = await safeFetch('/api/tasks');
+        renderTasks(Array.isArray(data.tasks) ? data.tasks : []);
+      } catch (e) {
+        $list.innerHTML = '<li class="item" style="border-color:#ffb4b4">Could not reach the server.</li>';
+        console.error('tasks load failed:', e);
+      }
+    }
+
+    function renderTasks(tasks) {
+      $list.innerHTML = '';
+      if (!tasks.length) {
+        const li = document.createElement('li');
+        li.className='item';
+        li.innerHTML = '<span class="muted">No tasks yet. Add one above or paste a weekly brief.</span>';
+        $list.appendChild(li);
+        return;
+      }
+
+      for (const t of tasks) {
+        const li = document.createElement('li'); 
+        li.className='item' + (t.done ? ' done' : '');
+
+        const cb = document.createElement('input'); 
+        cb.type='checkbox'; cb.checked=!!t.done;
+        cb.onchange = async ()=>{
+          await safeFetch(`/api/tasks/${t.id}`, {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({done:cb.checked})});
+          li.classList.toggle('done', cb.checked); // strike-through via CSS
+          loadTasks();
+        };
+
+        // Always-visible label + input editor (kept in sync)
+        const label = document.createElement('div');
+        label.className='task-title';
+        label.textContent = String(t.title ?? '(untitled)');
+
+        const title = document.createElement('input');
+        title.className='titleEditable';
+        title.value=String(t.title ?? '');
+        title.spellcheck=false;
+        title.onchange = async ()=>{
+          const newTitle = title.value.trim() || '(untitled)';
+          label.textContent = newTitle;
+          await safeFetch(`/api/tasks/${t.id}`, {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({title:newTitle})});
+        };
+
+        const minsWrap = document.createElement('div'); 
+        minsWrap.style.display='flex'; minsWrap.style.alignItems='center'; minsWrap.style.gap='8px';
+        const mins = document.createElement('input'); 
+        mins.type='number'; mins.min='5'; mins.step='5'; mins.value=t.duration_min ?? 25; mins.className='mins';
+        mins.onchange = async ()=>{
+          const v=Math.max(5, parseInt(mins.value,10)||25);
+          await safeFetch(`/api/tasks/${t.id}`, {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({duration_min:v})});
+          loadTasks();
+        };
+        const minsPill = document.createElement('span'); minsPill.className='pill'; minsPill.textContent='min';
+        minsWrap.append(mins, minsPill);
+
+        const del = document.createElement('button'); 
+        del.textContent='Delete';
+        del.onclick = async ()=>{
+          if(!confirm('Delete this task?')) return;
+          await safeFetch(`/api/tasks/${t.id}`, {method:'DELETE'});
+          loadTasks();
+        };
+
+        li.append(cb, label, title, minsWrap, del);
+        $list.appendChild(li);
+      }
+    }
+
+    $('addBtn').onclick = async ()=>{
+      const title = $('newTitle').value.trim();
+      const duration_min = parseInt($('newMinutes').value,10) || 25;
+      if(!title) return alert('Enter a task title');
+      try {
+        await safeFetch('/api/tasks', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({title, duration_min})
+        });
+        $('newTitle').value=''; $('newMinutes').value='';
+        loadTasks();
+      } catch (e) { alert('Add failed: '+e.message); }
+    };
+
+    // ---------- brief → tasks with loading state ----------
+    $('parseBtn').onclick = async ()=>{
+      const btn = $('parseBtn');
+      const status = $('parseStatus');
+      const text = $('brief').value.trim();
+      if(!text) return alert('Write a brief first.');
+
+      btn.classList.add('button-busy');
+      const original = btn.textContent;
+      btn.textContent = 'Creating tasks…';
+      if (status) status.textContent = 'Working…';
+
+      try {
+        const data = await safeFetch('/api/ai/weekly-parse', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({text})
+        });
+        if (status) status.textContent = `Created via ${data.source}.`;
+        await loadTasks();
+      } catch (e) {
+        if (status) status.textContent = 'Could not create tasks: ' + e.message;
+      } finally {
+        btn.classList.remove('button-busy');
+        btn.textContent = original;
+      }
+    };
+
+    // ---------- session planner with loading state ----------
+    const $plan = $('plan');
+    function renderPlan(blocks){
+      $plan.innerHTML='';
+      nextWorkSec = null; nextTitle = null;
+      if (!Array.isArray(blocks) || !blocks.length) {
+        const li = document.createElement('li'); li.className='item'; li.innerHTML='<span class="muted">No plan yet.</span>';
+        $plan.appendChild(li); $('currentTask').textContent = ''; return;
+      }
+      for (const b of blocks) {
+        const li = document.createElement('li'); li.className='item';
+        const label = document.createElement('div'); label.style.flex='1';
+        label.textContent = (b.type==='work' ? 'Work' : 'Break') + ' • ' + Math.round((b.seconds||1500)/60) + 'm' + (b.title?` • ${b.title}`:'');
+        li.appendChild(label); $plan.appendChild(li);
+        if (!nextWorkSec && b.type==='work'){ nextWorkSec=b.seconds||1500; nextTitle=b.title||null; $('currentTask').textContent = nextTitle ? 'Next: '+nextTitle : ''; }
+      }
+    }
+
+    $('planBtn').onclick = async ()=>{
+      const btn = $('planBtn');
+      const minutes = parseInt($('minutes').value,10);
+      if(!(minutes>0)) return alert('Enter minutes (e.g., 90)');
+
+      btn.classList.add('button-busy');
+      const original = btn.textContent;
+      btn.textContent = 'Generating…';
+      $plan.innerHTML = '<li class="item list-loading">Generating plan…</li>';
+
+      try {
+        const data = await safeFetch('/api/plan/generate', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({minutesAvailable: minutes})
+        });
+        renderPlan(data.blocks||[]);
+      } catch (e) {
+        $plan.innerHTML = '<li class="item" style="border-color:#ffb4b4">Plan failed.</li>';
+        alert('Plan failed: '+e.message);
+      } finally {
+        btn.classList.remove('button-busy');
+        btn.textContent = original;
+      }
+    };
+
+    // ---------- initial load ----------
+    (async ()=>{ await loadTasks(); try { const data = await safeFetch('/api/plan'); renderPlan(data.blocks||[]); } catch { renderPlan([]); } })();
+  </script>
+</body>
+</html>

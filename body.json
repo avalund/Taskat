@@ -1,0 +1,5 @@
+{
+  "model": "qwen2.5:3b",
+  "prompt": "Return ONLY JSON: {\"ok\": true}",
+  "stream": false
+}
