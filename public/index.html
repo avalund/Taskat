@@ -7,7 +7,7 @@
   <style>
     :root{
       /* Light, consistent purple for the Timer page */
-      --bg-solid: #cdb8f5;              /* change this to taste for a lighter/darker purple */
+      --bg-solid: #cdb8f5;             
 
       /* Original gradient for the Tasks page */
       --bg-grad: radial-gradient(1200px 600px at 20% -10%, #9f7bb6 0%, transparent 60%),
@@ -115,7 +115,7 @@
       padding: 12px 14px; border-radius: 12px;
       box-shadow: 0 6px 20px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.05);
       margin-top: 10px;
-      font-size: 18px; /* larger task text */
+      font-size: 18px; 
     }
     li.item:first-child{ margin-top:0 }
     .titleEditable{
@@ -233,7 +233,7 @@ Laundry"></textarea>
     $('tabTimer').onclick = () => selectTab('tabTimer');
     $('tabTasks').onclick = () => selectTab('tabTasks');
 
-    // ---------- timer (classic Pomodoro + manual breaks) ----------
+    // ---------- timer ----------
     let timer = null;
     let isWork = true;
     let left = 25 * 60;
@@ -325,7 +325,7 @@ Laundry"></textarea>
 
     paint();
 
-    // ---------- checklist with loading states ----------
+    // ---------- checklist ----------
     const $list = $('list');
 
     async function loadTasks() {
@@ -415,7 +415,7 @@ Laundry"></textarea>
       } catch (e) { alert('Add failed: '+e.message); }
     };
 
-    // ---------- brief → tasks with loading state ----------
+    // ---------- summary to tasks with loading state ----------
     $('parseBtn').onclick = async ()=>{
       const btn = $('parseBtn');
       const status = $('parseStatus');
