@@ -6,157 +6,273 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root{
-      /* Light, consistent purple for the Timer page */
-      --bg-solid: #cdb8f5;             
+      /* Single consistent gradient across the whole page */
+      --bg-grad: linear-gradient(135deg, #6f4a98 0%, #8b67b0 40%, #9f7bb6 70%, #cdb8f5 100%);
 
-      /* Original gradient for the Tasks page */
-      --bg-grad: radial-gradient(1200px 600px at 20% -10%, #9f7bb6 0%, transparent 60%),
-                 #6f4a98;
-
-      --card: rgba(255,255,255,0.12);
-      --card-strong: rgba(255,255,255,0.18);
+      /* Glassy cards + accents */
+      --card: rgba(255,255,255,0.10);
+      --card-strong: rgba(255,255,255,0.16);
       --text: #fff;
-      --muted: rgba(255,255,255,0.85);
-      --line: rgba(255,255,255,0.22);
+      --muted: rgba(255,255,255,0.88);
       --ring: rgba(255,255,255,0.35);
-      --green:#49e38c; --red:#ff6b6b;
-      --radius: 14px; --gap: 14px;
+      --line: rgba(255,255,255,0.22);
+      --green:#49e38c; 
+      --red:#ff6b6b;
+
+      /* Spacing & radius tuned for slide-like airiness */
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --gap: 22px;
+      --pad-xl: 32px;
+      --pad-lg: 22px;
     }
+
     *{box-sizing:border-box}
     body{
+
+  padding-top: var(--header-h);
+
       margin:0; color:var(--text);
-      background: var(--bg-grad);
+      background: var(--bg-grad) fixed;
       font-family: ui-sans-serif, system-ui, Segoe UI, Roboto, Arial, sans-serif;
       -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+      letter-spacing: .2px;
     }
 
-    /* Header */
-    header{
-      padding: 16px 0; text-align:center; position: sticky; top:0; z-index: 10;
-    }
-    header h1{ margin:0; font-size: 24px; letter-spacing: .5px; font-weight: 700; }
-    #cat{ width:100px; position:fixed; top:10px; right:10px; filter:none; }
+   :root{
+  --header-h: 96px; /* adjust if your header is taller/shorter */
+}
 
-    /* Layout */
-    .wrap{ max-width: 960px; margin: 20px auto 40px; padding: 0 16px; display: grid; gap: var(--gap) }
-    .h1{ display:flex; align-items:center; gap:10px }
-    .muted{ color:var(--muted); font-size:13px }
-
-    /* Tabs */
-    .tabs{
-      display:flex; gap:8px; background: rgba(255,255,255,0.10);
-      padding:6px; border-radius: 14px; border:1px solid var(--line);
+header{
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--header-h);
+  display: flex; align-items: center; justify-content: center;
+  background: #fff;            /* solid white */
+  color: #2b1f44;
+  z-index: 1000;
+  box-shadow: 0 6px 20px rgba(0,0,0,.15);
+  padding: 0;                  /* use explicit height instead of padding */
+}
+    header .brand{ 
+      display:flex; 
+      align-items:center; 
+      gap:14px; 
+      justify-content:center; 
     }
+header h1{
+  margin: 0;
+  font-size: 48px;             /* bump up as requested */
+  font-weight: 900;
+  letter-spacing: .5px;
+  color: #2b1f44;
+}
+    .cat-badge{ 
+      width:50px; height:50px; 
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,.28)); 
+      opacity:.95;
+    }
+
+    /* Page wrap with generous breathing room */
+/*.wrap{
+  max-width: 980px; 
+  margin: 0 auto 60px; 
+  padding: 120px 18px 0;     /* push content down below header */
+  /*display: grid; 
+  gap: var(--gap);
+}*/
+    .muted{ color:var(--muted); font-size:14px }
+
+    /* Tabs: centered pill with extra padding/spacing */
+.tabs{
+  display:flex; 
+  gap:10px; 
+  background: rgba(255,255,255,0.10);
+  padding:10px; 
+  border-radius: 16px; 
+  border:1px solid var(--line);
+  width: max-content; 
+  margin: 40px auto 0;   /* ⬅ push tabs further down */
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 16px 40px rgba(0,0,0,.25);
+}
     .tab-btn{
-      appearance:none; border:0; cursor:pointer; font-weight:700;
-      padding:12px 16px; border-radius: 12px; color:#2b1f44;
-      background: rgba(255,255,255,0.95);
+      appearance:none; 
+      border:0; 
+      cursor:pointer; 
+      font-weight:900;
+      padding:14px 22px; 
+      border-radius: 14px; 
+      color:#2b1f44;
+      background: rgba(255,255,255,0.94);
       transition: background .15s ease, transform .06s ease, box-shadow .2s ease;
-      box-shadow: 0 6px 14px rgba(0,0,0,.18);
+      box-shadow: 0 10px 22px rgba(0,0,0,.24);
+      font-size: 15px;
     }
+    .tab-btn:hover{ box-shadow: 0 12px 26px rgba(0,0,0,.26) }
+    .tab-btn:active{ transform: translateY(1px) }
     .tab-btn[aria-selected="true"]{ background:#fff; outline: 2px solid #fff; color:#1b1330; }
     .tab-panel{ display:none; }
     .tab-panel.active{ display:block; }
 
-    /* Cards */
-    .card{
+    /* Main panel: single style (no internal gradient) to keep background consistent */
+    .panel{
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      padding: var(--pad-xl) var(--pad-xl);
+      box-shadow: 0 28px 70px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.06);
+      margin-top: 14px;
+    }
+
+    /* Sections: more vertical spacing inside */
+    .section{
       background: var(--card);
       border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 16px;
-      box-shadow: 0 10px 24px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.05);
-      margin-top: 10px;
+      border-radius: var(--radius-lg);
+      padding: var(--pad-lg);
+      box-shadow: 0 12px 30px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.05);
+      margin-top: 18px;
     }
-    .card h3{
-      margin: 0 0 10px; font-size: 14px; letter-spacing:.4px; text-transform: uppercase; color: var(--muted);
+    .section h3{
+      margin: 0 0 12px; 
+      font-size: 15px; 
+      letter-spacing:.5px; 
+      text-transform: uppercase; 
+      color: var(--muted);
     }
 
-    /* Timer */
+    /* Timer block: larger & airy */
+    #message{ 
+      text-align:center; 
+      margin: 6px 0 10px; 
+      font-weight:700; 
+      color:var(--muted);
+      font-size: 15px;
+    }
     #timer{
-      font-size: clamp(40px, 7vw, 64px);
-      text-align:center; margin:10px auto 12px;
-      font-weight:800; letter-spacing: 1px;
+      font-size: clamp(52px, 10vw, 88px);
+      text-align:center; 
+      margin:16px auto 18px;
+      font-weight:1000; 
+      letter-spacing: 1px;
       border: 2px solid var(--ring);
-      border-radius: 12px;
-      padding: 10px 22px;
-      background: rgba(255,255,255,0.08);
-      width: max-content; min-width: 220px;
+      border-radius: 22px;
+      padding: 16px 34px;
+      background: rgba(255,255,255,0.10);
+      width: max-content; 
+      min-width: 260px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
     }
-    .center{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap }
 
-    /* Buttons */
+    /* Layout helpers with bigger gaps */
+    .row{ display:flex; gap:14px; align-items:center; flex-wrap:wrap }
+    .center{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap }
+
+    /* Buttons: slightly larger */
     button{
-      background: rgba(255,255,255,0.95); color:#3b2462;
-      border: 0; border-radius: 10px; cursor:pointer; font-weight:700;
-      padding:10px 16px; transition: transform .06s ease, box-shadow .2s ease, background .2s ease;
-      box-shadow: 0 6px 14px rgba(0,0,0,.18);
+      background: rgba(255,255,255,0.96); 
+      color:#3b2462;
+      border: 0; 
+      border-radius: 14px; 
+      cursor:pointer; 
+      font-weight:900;
+      padding:12px 18px; 
+      transition: transform .06s ease, box-shadow .2s ease, background .2s ease;
+      box-shadow: 0 10px 24px rgba(0,0,0,.26);
+      font-size: 15px;
     }
+    button:hover{ box-shadow: 0 12px 28px rgba(0,0,0,.28) }
+    button:active{ transform: translateY(1px) }
     .btn-green{ color:#053d2c; background: var(--green) }
     .btn-red{ color:#3d0a0a; background: var(--red) }
 
-    /* Inputs */
-    input, textarea, select{
-      width:100%; padding:10px 12px; border-radius:10px;
-      border:1px solid var(--ring); background: rgba(255,255,255,0.08); color:var(--text);
-      outline:none; transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+    /* Inputs with more padding */
+    input, textarea{
+      width:100%; 
+      padding:14px 16px; 
+      border-radius:16px;
+      border:1px solid var(--ring); 
+      background: rgba(255,255,255,0.10); 
+      color:var(--text);
+      outline:none; 
+      transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
       font-size: 16px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
     }
-    textarea::placeholder, input::placeholder{ color:rgba(255,255,255,0.85) }
-    .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap }
-    .row>*{ flex:1 }
-    .mins{ flex: 0 0 110px }
+    input:focus, textarea:focus{ 
+      background: rgba(255,255,255,0.14); 
+      box-shadow: 0 0 0 3px rgba(255,255,255,.08);
+    }
+    textarea::placeholder, input::placeholder{ color:rgba(255,255,255,0.88) }
+    .mins{ flex: 0 0 130px }
 
-    /* Lists */
+    /* Lists with extra spacing */
     ul{ list-style:none; margin:0; padding:0 }
     li.item{
-      display:flex; align-items:center; gap:12px;
+      display:flex; 
+      align-items:center; 
+      gap:14px;
       background: var(--card-strong);
       border: 1px solid var(--line);
-      padding: 12px 14px; border-radius: 12px;
-      box-shadow: 0 6px 20px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.05);
-      margin-top: 10px;
-      font-size: 18px; 
+      padding: 16px; 
+      border-radius: 18px;
+      box-shadow: 0 10px 28px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.05);
+      margin-top: 12px;
+      font-size: 18px;
     }
     li.item:first-child{ margin-top:0 }
+    .task-title{ min-width: 240px; font-weight: 800; opacity:.98; font-size:18px; }
     .titleEditable{
-      flex:1; border:none; background:transparent; color:var(--text);
-      padding:8px 10px; border-radius:10px; font-weight:600; font-size:18px;
+      flex:1; 
+      border:none; 
+      background:transparent; 
+      color:var(--text);
+      padding:10px 12px; 
+      border-radius:14px; 
+      font-weight:700; 
+      font-size:18px;
     }
-    .titleEditable:focus{ outline:1px solid var(--ring); background: rgba(255,255,255,0.1) }
-    .task-title{ min-width: 220px; font-weight: 700; opacity:.95; font-size:18px; }
+    .titleEditable:focus{ outline:1px solid var(--ring); background: rgba(255,255,255,0.12) }
     .item.done .task-title, .item.done .titleEditable{ text-decoration: line-through; opacity: .7; }
-    .pill{ font-size: 12px; padding:4px 8px; border-radius: 999px; background: rgba(255,255,255,0.12); border: 1px solid var(--ring) }
-    #plan li.item{ background: rgba(255,255,255,0.1) }
+    .pill{ font-size: 12px; padding:6px 10px; border-radius: 999px; background: rgba(255,255,255,0.14); border: 1px solid var(--ring) }
 
-    /* Loading / busy helpers */
+    /* Tiny helpers */
     .button-busy { opacity: .75; pointer-events: none; }
     .list-loading { opacity: .85; font-style: italic; }
+
+    /* Footer date spacing */
+    #today{ text-align:center; margin-top: 14px; font-size:14px }
   </style>
 </head>
 <body>
-  <img src="cat.png" alt="cat" id="cat">
   <header>
-    <h1>Taskat</h1>
+    <div class="brand">
+      <h1>Taskat</h1>
+      <!-- Minimal cat badge (inline SVG) -->
+      <svg class="cat-badge" viewBox="0 0 64 64" aria-hidden="true">
+        <circle cx="32" cy="34" r="20" fill="#fff"/>
+        <path d="M16 20l4-8 8 6M48 20l-4-8-8 6" fill="#fff" stroke="#3b2462" stroke-width="2" stroke-linejoin="round"/>
+        <circle cx="26" cy="34" r="3" fill="#3b2462"/>
+        <circle cx="38" cy="34" r="3" fill="#3b2462"/>
+        <circle cx="32" cy="38" r="2" fill="#3b2462"/>
+      </svg>
+    </div>
   </header>
 
   <div class="wrap">
-    <!-- header row (bubble removed) -->
-    <div class="h1">
-      <div class="muted" style="margin-left:auto" id="today"></div>
-    </div>
-
     <!-- Tabs -->
-    <div class="tabs" role="tablist" aria-label="Pomo Planner Sections">
+    <div class="tabs" role="tablist" aria-label="Taskat Sections">
       <button class="tab-btn" id="tabTimer" role="tab" aria-controls="panelTimer" aria-selected="true">Timer</button>
-      <button class="tab-btn" id="tabTasks" role="tab" aria-controls="panelTasks" aria-selected="false">Tasks & Planning</button>
+      <button class="tab-btn" id="tabTasks" role="tab" aria-controls="panelTasks" aria-selected="false">Tasks &amp; Planning</button>
     </div>
 
-    <!-- TAB: Timer -->
-    <section id="panelTimer" class="tab-panel active" role="tabpanel" aria-labelledby="tabTimer">
-      <div class="card">
-        <p id="message" class="muted" style="text-align:center;margin:0 0 6px;">Work Time</p>
+    <!-- Main panel (kept simple, airy) -->
+    <div class="panel">
+      <!-- TAB: Timer -->
+      <section id="panelTimer" class="tab-panel active" role="tabpanel" aria-labelledby="tabTimer">
+        <p id="message" class="muted">Work Time</p>
         <div id="timer">25:00</div>
-        <div class="center">
+        <div class="center" style="margin-top:10px">
           <button id="startBtn" class="btn-green">Start</button>
           <button id="stopBtn"  class="btn-red">Stop</button>
           <button id="resetBtn">Reset</button>
@@ -164,49 +280,51 @@
           <button id="shortBreakBtn">Short Break (5m)</button>
           <button id="longBreakBtn">Long Break (15m)</button>
         </div>
-        <div class="muted" id="currentTask" style="text-align:center;margin-top:8px;"></div>
-      </div>
-    </section>
+        <div class="muted" id="currentTask" style="text-align:center;margin-top:14px;"></div>
+      </section>
 
-    <!-- TAB: Tasks & Planning -->
-    <section id="panelTasks" class="tab-panel" role="tabpanel" aria-labelledby="tabTasks">
-      <!-- weekly brief -->
-      <div class="card">
-        <h3>Weekly Brief</h3>
-        <div class="row">
-          <textarea id="brief" rows="5" placeholder="Finish slides due Monday ~45min #work high
+      <!-- TAB: Tasks & Planning -->
+      <section id="panelTasks" class="tab-panel" role="tabpanel" aria-labelledby="tabTasks">
+        <!-- Weekly brief -->
+        <div class="section">
+          <h3>Weekly Brief</h3>
+          <div class="row">
+            <textarea id="brief" rows="5" placeholder="Finish slides due Monday ~45min #work high
 Research vendors Tue ~60m #work
 Call dentist
 Laundry"></textarea>
+          </div>
+          <div class="row" style="margin-top:12px">
+            <button id="parseBtn">Create Tasks</button>
+            <span class="muted" id="parseStatus"></span>
+          </div>
         </div>
-        <div class="row" style="margin-top:8px">
-          <button id="parseBtn">Create Tasks</button>
-          <span class="muted" id="parseStatus"></span>
-        </div>
-      </div>
 
-      <!-- checklist -->
-      <div class="card">
-        <h3>Task List</h3>
-        <div class="row">
-          <input id="newTitle" placeholder="Add a task…" />
-          <input id="newMinutes" class="mins" type="number" min="5" step="5" placeholder="min" />
-          <button id="addBtn">Add</button>
+        <!-- Checklist -->
+        <div class="section">
+          <h3>Task List</h3>
+          <div class="row">
+            <input id="newTitle" placeholder="Add a task…" />
+            <input id="newMinutes" class="mins" type="number" min="5" step="5" placeholder="min" />
+            <button id="addBtn">Add</button>
+          </div>
+          <ul id="list" style="margin-top:12px"></ul>
+          <div class="muted" style="margin-top:10px">Tip: click the title to edit; change minutes; tick to mark done.</div>
         </div>
-        <ul id="list" style="margin-top:10px"></ul>
-        <div class="muted" style="margin-top:8px">Tip: click the title to edit; change minutes; tick to mark done.</div>
-      </div>
 
-      <!-- session planner -->
-      <div class="card">
-        <h3>Session Planner</h3>
-        <div class="row">
-          <input id="minutes" type="number" min="10" step="5" placeholder="How many minutes? e.g., 90" />
-          <button id="planBtn">Generate plan</button>
+        <!-- Session planner -->
+        <div class="section">
+          <h3>Session Planner</h3>
+          <div class="row">
+            <input id="minutes" type="number" min="10" step="5" placeholder="How many minutes? e.g., 90" />
+            <button id="planBtn">Generate plan</button>
+          </div>
+          <ul id="plan" style="margin-top:12px"></ul>
         </div>
-        <ul id="plan" style="margin-top:10px"></ul>
-      </div>
-    </section>
+      </section>
+    </div>
+
+    <div class="muted" id="today"></div>
   </div>
 
   <script>
@@ -229,11 +347,13 @@ Laundry"></textarea>
       Object.values(panels).forEach(p => p.classList.remove('active'));
       const target = id === 'tabTimer' ? panels.panelTimer : panels.panelTasks;
       target.classList.add('active');
+      // Optional: scroll to top of panel for a slide-like feel
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     $('tabTimer').onclick = () => selectTab('tabTimer');
     $('tabTasks').onclick = () => selectTab('tabTasks');
 
-    // ---------- timer ----------
+    // ---------- timer (classic Pomodoro + manual breaks) ----------
     let timer = null;
     let isWork = true;
     let left = 25 * 60;
@@ -325,7 +445,7 @@ Laundry"></textarea>
 
     paint();
 
-    // ---------- checklist ----------
+    // ---------- checklist with loading states ----------
     const $list = $('list');
 
     async function loadTasks() {
@@ -415,7 +535,7 @@ Laundry"></textarea>
       } catch (e) { alert('Add failed: '+e.message); }
     };
 
-    // ---------- summary to tasks with loading state ----------
+    // ---------- brief → tasks with loading state ----------
     $('parseBtn').onclick = async ()=>{
       const btn = $('parseBtn');
       const status = $('parseStatus');
@@ -486,7 +606,15 @@ Laundry"></textarea>
     };
 
     // ---------- initial load ----------
-    (async ()=>{ await loadTasks(); try { const data = await safeFetch('/api/plan'); renderPlan(data.blocks||[]); } catch { renderPlan([]); } })();
+    (async ()=>{
+      await loadTasks(); 
+      try { 
+        const data = await safeFetch('/api/plan'); 
+        renderPlan(data.blocks||[]); 
+      } catch { 
+        renderPlan([]); 
+      } 
+    })();
   </script>
 </body>
 </html>
